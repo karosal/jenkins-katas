@@ -17,8 +17,24 @@ pipeline {
             sh 'echo "hello world"'
           }
         }
-
         stage('build app') {
+          agent {
+            docker {
+              image 'gradle:jdk11'
+            }
+          }
+          when {
+            beforeAgent true
+            branch 'master'
+          }
+          steps {
+            unstash 'code'
+            sh 'ci/build-app.sh'
+            archiveArtifacts 'app/build/libs/'
+          }
+        }
+        stage('test app') {
+          options { skipDefaultCheckout() }
           agent {
             docker {
               image 'gradle:jdk11'
@@ -27,13 +43,12 @@ pipeline {
           }
           steps {
             unstash 'code'
-            sh 'ci/build-app.sh'
-            archiveArtifacts 'app/build/libs/'
+            sh 'ci/unit-test-app.sh'
+            junit 'app/build/test-results/test/TEST-*.xml'
           }
         }
 
       }
     }
-
   }
 }
