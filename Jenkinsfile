@@ -4,8 +4,8 @@ pipeline {
     skipDefaultCheckout()
   }
   stages {
-    agent { label 'swarm' }
     stage('Clone down') {
+      agent { label 'swarm' }
       steps {
         stash excludes: '.git', name: 'code'
       }
